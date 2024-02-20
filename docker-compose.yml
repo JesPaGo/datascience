@@ -1,0 +1,46 @@
+# docker-compose
+version: '3.8'
+services:
+  backend:
+    build: 
+      context: .
+      dockerfile: jupyter.dockerfile
+    container_name: datascience_svc
+    ports:
+      - 9000:9000
+    volumes:
+      - ./notebooks/:/home/jupyter/work
+    restart: always
+    networks:
+      app_network:
+        aliases:
+          - jupyter_host
+  database:
+    build:
+      context: .
+      dockerfile: mysql.dockerfile
+    container_name: database_svc
+    ports:
+      - 3306:3306
+    restart:
+      always
+    environment:
+      MYSQL_DATABASE: "custom_db"
+      MYSQL_ROOT_PASSWORD: "1234"
+    volumes:
+      - ./databases/custom_db:/var/lib/mysql
+    networks:
+      app_network:
+        aliases:
+          - mysql_host
+
+volumes:
+  notebooks: {}
+  databases: {}
+
+networks:
+  app_network:
+    name: app_net
+    driver: bridge
+    ipam:
+      driver: default
